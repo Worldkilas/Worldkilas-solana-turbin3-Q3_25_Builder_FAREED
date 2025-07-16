@@ -1,0 +1,51 @@
+{
+  "name": "wba-solana",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "airdrop_to_wallet": "nodemon --watch ./cluster1 --ext ts --exec ts-node ./tools/airdrop_to_wallet.ts",
+    "base58_to_wallet": "nodemon --watch ./cluster1 --ext ts --exec ts-node ./tools/base58_to_wallet.ts",
+    "wallet_to_base58": "nodemon --watch ./cluster1 --ext ts --exec ts-node ./tools/wallet_to_base58.ts",
+    "keygen": "nodemon --watch ./cluster1 --ext ts --exec ts-node ./prereq/keygen.ts",
+    "airdrop": "nodemon --watch ./cluster1 --ext ts --exec ts-node ./prereq/airdrop.ts",
+    "transfer": "nodemon --watch ./cluster1 --ext ts --exec ts-node ./prereq/transfer.ts",
+    "enroll": "nodemon --watch ./cluster1 --ext ts --exec ts-node ./prereq/enroll.ts",
+    "spl_init": "nodemon --watch ./cluster1 --ext ts --exec ts-node ./cluster1/spl_init.ts",
+    "spl_mint": "nodemon --watch ./cluster1 --ext ts --exec ts-node ./cluster1/spl_mint.ts",
+    "spl_transfer": "nodemon --watch ./cluster1 --ext ts --exec ts-node ./cluster1/spl_transfer.ts",
+    "spl_metadata": "nodemon --watch ./cluster1 --ext ts --exec ts-node ./cluster1/spl_metadata.ts",
+    "nft_image": "nodemon --watch ./cluster1 --ext ts --exec ts-node ./cluster1/nft_image.ts",
+    "nft_metadata": "nodemon --watch ./cluster1 --ext ts --exec ts-node ./cluster1/nft_metadata.ts",
+    "nft_mint": "nodemon --watch ./cluster1 --ext ts --exec ts-node ./cluster1/nft_mint.ts",
+    "vault_init": "nodemon --watch ./cluster1 --ext ts --exec ts-node ./cluster1/vault_init.ts",
+    "vault_deposit": "nodemon --watch ./cluster1 --ext ts --exec ts-node ./cluster1/vault_deposit.ts",
+    "vault_withdraw": "nodemon --watch ./cluster1 --ext ts --exec ts-node ./cluster1/vault_withdraw.ts",
+    "vault_deposit_spl": "nodemon --watch ./cluster1 --ext ts --exec ts-node ./cluster1/vault_deposit_spl.ts",
+    "vault_withdraw_spl": "nodemon --watch ./cluster1 --ext ts --exec ts-node ./cluster1/vault_withdraw_spl.ts",
+    "vault_deposit_nft": "nodemon --watch ./cluster1 --ext ts --exec ts-node ./cluster1/vault_deposit_nft.ts",
+    "vault_withdraw_nft": "nodemon --watch ./cluster1 --ext ts --exec nodemon --watch ./cluster1 --ext ts --exec ts-node ./cluster1/vault_withdraw_nft.ts",
+    "vault_close": "nodemon --watch ./cluster1 --ext ts --exec ts-node ./cluster1/vault_close.ts",
+    "spl_umi_mint": "nodemon --watch ./cluster1 --ext ts --exec ts-node ./cluster1/spl_umi_mint.ts"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "0.29.0",
+    "@metaplex-foundation/mpl-token-metadata": "3.1.1",
+    "@metaplex-foundation/umi": "^0.8.10",
+    "@metaplex-foundation/umi-bundle-defaults": "^0.8.10",
+    "@metaplex-foundation/umi-uploader-aws": "^1.2.0",
+    "@metaplex-foundation/umi-uploader-irys": "^0.9.1",
+    "@metaplex-foundation/umi-uploader-nft-storage": "^1.2.0",
+    "@solana/spl-token": "^0.4.13",
+    "@solana/web3.js": "^1.87.6",
+    "@types/node": "^20.9.3",
+    "@types/prompt": "^1.1.8",
+    "bs58": "^5.0.0",
+    "prompt": "^1.3.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "packageManager": "yarn@4.9.2+sha512.1fc009bc09d13cfd0e19efa44cbfc2b9cf6ca61482725eb35bbc5e257e093ebf4130db6dfe15d604ff4b79efd8e1e8e99b25fa7d0a6197c9f9826358d4d65c3c"
+}
