@@ -35,21 +35,41 @@ Prerequisites
 Rust (latest stable version)
 Node.js and Yarn for TypeScript parts
 Solana CLI for cluster management
+
 Installation
-Clone the repository
+Clone the repository:
 
-Install Rust dependencies
-Navigate to the Rust project directories and run:
+```bash
+git clone https://github.com/yourusername/turbin3.git
+cd turbin3
+```
 
-Install Node Dependencies
-In directories with a package.json (such as solana-starter/ts or vaults/package.json):
+Install Rust dependencies:
+
+```bash
+cd prereqs/prereqs-rust
+cargo build
+```
+
+Install Node dependencies:
+
+```bash
+cd solana-starter/ts
+yarn install
+```
 
 Running Tests
 Rust Tests:
-In the Rust directories, run:
+
+```bash
+cargo test
+```
 
 TypeScript Tests / Scripts:
-Use the provided npm scripts from the corresponding package.json. For example:
+
+```bash
+yarn test
+```
 
 Deployment
 Follow the instructions in your build scripts or deployment pipeline as outlined in the scripts section of package.json.
@@ -59,3 +79,21 @@ My Journey
 This repository not only serves as a working project for managing various vault functionalities on Solana but also as a diary of my experiences during the Solana Turbine Q3 Cohort. Every module, script, and test reflects a learning milestone and the challenges overcome along the way.
 
 I hope this documentation provides a clear window into my work and the evolution of the project during the cohort.
+
+Contributing
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature-branch`).
+3. Commit your changes (`git commit -m "Add feature"`).
+4. Push to the branch (`git push origin feature-branch`).
+5. Open a pull request.
+
+License
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+Acknowledgments
+
+- Solana Foundation for providing resources and support.
+- The Turbine Q3 Cohort community for collaboration and feedback.
+- Open-source contributors for libraries like @solana/web3.js and Anchor.
