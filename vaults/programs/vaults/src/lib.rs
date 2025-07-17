@@ -7,8 +7,6 @@ declare_id!("86nmyVnDib9yccgyUMkxY47Cre15mdzW3Anhz9uEtkGz");
 #[program]
 pub mod vaults {
 
-    
-
     use super::*;
 
     pub fn initialize(ctx: Context<Initialize>)-> Result<()>{
