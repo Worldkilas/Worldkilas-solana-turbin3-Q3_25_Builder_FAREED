@@ -74,7 +74,7 @@ pub struct Take<'info> {
         has_one=maker,
         has_one=mint_a,
         has_one=mint_b,
-        seeds=[b"escrow",maker.key().as_ref(), escrow.discriminator.to_le_bytes().as_ref()],
+        seeds=[b"escrow",maker.key().as_ref(), escrow.seeds.to_le_bytes().as_ref()],
         bump=escrow.bump,
     )]
     pub escrow: Account<'info, Escrow>,
@@ -114,7 +114,7 @@ impl<'info> Take<'info> {
         let signer_seeds = [
             b"escrow",
             self.maker.to_account_info().key.as_ref(),
-            &self.escrow.discriminator.to_le_bytes()[..],
+            &self.escrow.seeds.to_le_bytes()[..],
             &[self.escrow.bump],
         ];
         // Transform the signer seeds into a slice of slices

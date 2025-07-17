@@ -31,7 +31,7 @@ pub struct Refund<'info> {
         mut,
         close=maker,
         has_one= mint_a,
-        seeds=[b"escrow", maker.key().as_ref(), escrow.discriminator.to_le_bytes().as_ref()],
+        seeds=[b"escrow", maker.key().as_ref(), escrow.seeds.to_le_bytes().as_ref()],
         bump=escrow.bump,
         
     )]
@@ -55,7 +55,7 @@ impl <'info> Refund <'info> {
         let signer_seeds=[
             b"escrow",
             self.maker.to_account_info().key.as_ref(),
-            &self.escrow.discriminator.to_le_bytes()[..],
+            &self.escrow.seeds.to_le_bytes()[..],
             &[self.escrow.bump]
         ];
         

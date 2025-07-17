@@ -8,7 +8,7 @@ use crate::Escrow;
 
 /// Initialize the escrow program and the deposit funds
 #[derive(Accounts)]
-#[instruction(discriminator:u64)]
+#[instruction(seeds:u64)]
 pub struct Make<'info> {
     #[account(mut)]
     pub maker: Signer<'info>,
@@ -31,7 +31,7 @@ pub struct Make<'info> {
     #[account(
         init,
         payer=maker,
-        seeds=[b"escrow", maker.key().as_ref(), discriminator.to_le_bytes().as_ref()],
+        seeds=[b"escrow", maker.key().as_ref(), seeds.to_le_bytes().as_ref()],
         space= 8+ Escrow::INIT_SPACE,
         bump,
     )]
@@ -59,7 +59,7 @@ impl<'info> Make<'info> {
         bumps: &MakeBumps,
     ) -> Result<()> {
         self.escrow.set_inner(Escrow {
-            discriminator,
+            seeds: discriminator,
             maker: self.maker.key(),
             mint_a: self.mint_a.key(),
             mint_b: self.mint_b.key(),
