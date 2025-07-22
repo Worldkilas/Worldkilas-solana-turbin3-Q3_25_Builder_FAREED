@@ -1,4 +1,4 @@
-use anchor_lang::{error_code, error::Error};
+use anchor_lang::{error::Error, error_code};
 use constant_product_curve::CurveError;
 
 #[error_code]

@@ -8,7 +8,7 @@ use crate::Config;
 
 #[derive(Accounts)]
 #[instruction(seed:u64 )]
-pub struct Initialize <'info>{
+pub struct Initialize<'info> {
     #[account(mut)]
     pub admin: Signer<'info>,
     pub token_x_mint: Account<'info, Mint>,
@@ -49,24 +49,26 @@ pub struct Initialize <'info>{
     pub token_program: Program<'info, Token>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
-
 }
 
-impl <'info> Initialize<'info>{
-    pub fn initialize(&mut self, seed:u64, fee:u16, authority:Option<Pubkey>,bumps:&InitializeBumps)->Result<()>{
-        self.config.set_inner(
-           Config { 
-                seed, 
-                authority,
-                token_x_mint: self.token_x_mint.key(),
-                token_y_mint:self.token_y_mint.key(),
-                fee,
-                locked:false,
-                config_bump: bumps.config,
-                lp_bump:bumps.lp_token_mint  
-            }
-
-        );
+impl<'info> Initialize<'info> {
+    pub fn initialize(
+        &mut self,
+        seed: u64,
+        fee: u16,
+        authority: Option<Pubkey>,
+        bumps: &InitializeBumps,
+    ) -> Result<()> {
+        self.config.set_inner(Config {
+            seed,
+            authority,
+            token_x_mint: self.token_x_mint.key(),
+            token_y_mint: self.token_y_mint.key(),
+            fee,
+            locked: false,
+            config_bump: bumps.config,
+            lp_bump: bumps.lp_token_mint,
+        });
         Ok(())
     }
 }

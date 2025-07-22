@@ -5,7 +5,7 @@ use anchor_spl::{
 };
 use constant_product_curve::ConstantProduct;
 
-use crate::{error::AmmError, state::Config};
+use crate::{error::AmmError, require_non_zero, require_not_locked, state::Config};
 
 #[derive(Accounts)]
 pub struct Deposit<'info> {
@@ -13,8 +13,10 @@ pub struct Deposit<'info> {
     #[account(mut)]
     pub depositor: Signer<'info>,
     /// The mint address of Token X (e.g., USDC).
+    #[account(mint::token_program=token_program)]
     pub token_x_mint: Account<'info, Mint>,
     /// The mint address of Token Y (e.g., SOL)
+    #[account(mint::token_program=token_program)]
     pub token_y_mint: Account<'info, Mint>,
 
     /// Global AMM configuration PDA that holds metadata like fees and bumps.
@@ -40,7 +42,7 @@ pub struct Deposit<'info> {
     /// - Owned by the AMM (authority = config)
     #[account(
         mut,
-        associated_token::mint=token_x_mint,
+        associated_token::mint=token_y_mint,
         associated_token::authority=config
     )]
     pub pool_token_y_vault: Account<'info, TokenAccount>,
@@ -91,8 +93,8 @@ pub struct Deposit<'info> {
 
 impl<'info> Deposit<'info> {
     pub fn deposit(&mut self, lp_amount_to_be_minted: u64, max_x: u64, max_y: u64) -> Result<()> {
-        require!(self.config.locked == false, AmmError::PoolLocked);
-        require!(lp_amount_to_be_minted != 0, AmmError::InvalidAmount);
+        require_not_locked!(self.config.locked);
+        require_non_zero!([lp_amount_to_be_minted, max_x, max_y]);
         let (x, y) = match self.lp_token_mint.supply == 0
             && self.pool_token_x_vault.amount == 0
             && self.pool_token_y_vault.amount == 0
@@ -106,7 +108,7 @@ impl<'info> Deposit<'info> {
                     lp_amount_to_be_minted,
                     6,
                 )
-                .unwrap();
+                .map_err(AmmError::from)?;
                 (amount.x, amount.y)
             }
         };
@@ -115,7 +117,7 @@ impl<'info> Deposit<'info> {
         self.deposit_tokens(true, x)?;
         self.deposit_tokens(false, y)?;
 
-        self.mint_lp_tokens(lp_amount_to_be_minted)? ;
+        self.mint_lp_tokens(lp_amount_to_be_minted)?;
         Ok(())
     }
     pub fn deposit_tokens(&mut self, is_token_x: bool, amount: u64) -> Result<()> {
