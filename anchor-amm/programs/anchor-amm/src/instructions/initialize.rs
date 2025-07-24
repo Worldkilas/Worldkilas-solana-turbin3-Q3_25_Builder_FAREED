@@ -5,6 +5,25 @@ use anchor_spl::{
 };
 
 use crate::Config;
+/// Accounts required for initializing the liquidity pool.
+///
+/// This instruction performs the following actions:
+/// - Creates and initializes the config account using the provided `seed`.
+/// - Creates a new LP token mint controlled by the config.
+/// - Initializes token vaults (associated token accounts) for token X and token Y, 
+///   owned by the config.
+/// - Allocates space for the config account and seeds the LP mint and config PDAs.
+///
+/// The `admin` pays for all account creations.
+/// 
+/// ## PDA Seeds
+/// - `config` PDA: `["config", seed.to_le_bytes()]`
+/// - `lp_token_mint` PDA: `["lp", config.key()]`
+///
+/// ## Constraints
+/// - `token_x_mint` and `token_y_mint` must be valid SPL token mints.
+/// - The LP mint is created with 6 decimal places and authority set to the config.
+/// - The token vaults are created as associated token accounts with the config as the owner.
 
 #[derive(Accounts)]
 #[instruction(seed:u64 )]

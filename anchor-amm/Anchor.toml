@@ -8,12 +8,16 @@ skip-lint = false
 [programs.localnet]
 anchor_amm = "6HPwmQCHtUC5kgwo4KvMRAWisuZJi9XZwEJCn7q3vkte"
 
+[programs.devnet]
+anchor_amm="6HPwmQCHtUC5kgwo4KvMRAWisuZJi9XZwEJCn7q3vkte"
+
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
-wallet = "~/.config/solana/id.json"
+cluster = "devnet"
+wallet = "~/.config/solana/turbin3-wallet.json"
+
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

@@ -15,11 +15,25 @@ declare_id!("6HPwmQCHtUC5kgwo4KvMRAWisuZJi9XZwEJCn7q3vkte");
 #[program]
 pub mod anchor_amm {
     
-
     use super::*;
+   
+    
+    /// Arguments used to initialize a new liquidity pool.
+    /// - `seed`: Unique seed used to derive the config PDA.
+    /// - `fee`: Fee in basis points (e.g. 30 = 0.3%) applied on swaps.
+    /// - `authority`: Optional admin override. If `None`, the initializer becomes authority.
+    ///
+    /// This struct is passed to the `initialize` instruction to configure the pool.
+    #[derive(AnchorSerialize,AnchorDeserialize)]
+    pub struct InitArgs{
+        pub seed: u64,
+        pub fee: u16,
+        pub authority: Option<Pubkey>
 
-    pub fn intialize(ctx: Context<Initialize>,fee: u16, authority:Option<Pubkey>,seed: u64)-> Result<()>{
-        ctx.accounts.initialize(seed, fee, authority, &ctx.bumps)
+    }
+
+    pub fn initialize(ctx: Context<Initialize>,args: InitArgs)-> Result<()>{
+        ctx.accounts.initialize(args.seed,args.fee,args.authority, &ctx.bumps)
         
     }
 
