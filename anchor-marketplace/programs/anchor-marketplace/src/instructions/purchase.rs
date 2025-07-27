@@ -13,7 +13,45 @@ use anchor_spl::{
     },
 };
 
-use crate::{cpi, Listing, Marketplace};
+use crate::{ Listing, Marketplace};
+/// ## Delist Instruction
+///
+/// Allows a user to delist their NFT from the marketplace and reclaim ownership.
+/// This involves:
+/// - Transferring the NFT back from the vault account (escrow) to the lister's wallet.
+/// - Closing the listing account (a PDA that tracks the listing metadata).
+/// - Optionally closing the vault token account (SPL token account that held the NFT).
+///
+/// ### 🧾 Accounts:
+/// - `lister` [signer, mut]: The wallet of the user who originally listed the NFT.
+/// - `marketplace` [read]: PDA for the marketplace state. Used for bump and validation.
+/// - `lister_mint` [read]: The NFT mint address being delisted.
+/// - `lister_ata` [mut]: Lister's associated token account for receiving back the NFT.
+/// - `listing` [mut, close=lister]: PDA that tracked the NFT listing. Will be closed, and any rent returned to `lister`.
+/// - `vault` [mut, optional]: The SPL token account that held the NFT during listing. 
+///     This **must be closed manually** using the SPL Token program's `close_account` instruction, 
+///     since Anchor does not auto-close SPL Token accounts.
+/// - `token_program`: Interface for the Token Program (should be `Token2022` or SPL Token).
+///
+/// ### 🔐 Security & Ownership:
+/// - The vault account must be owned by the `listing` PDA (or the marketplace PDA depending on your logic),
+///   or else the close authority will fail.
+/// - The `close` attribute on `listing` automatically refunds rent to the `lister`.
+/// - The NFT is safely returned to the original lister's ATA.
+///
+/// ### 💰 Treasury:
+/// - This instruction typically does **not** involve any treasury action unless you include refund logic.
+/// - If you collected any listing fees previously, and want to refund partially, that logic should be added here explicitly.
+///
+/// ### ✅ Behavior Summary:
+/// - Reclaims the NFT back to the user
+/// - Closes and cleans up unused state accounts
+/// - Saves rent and prevents state bloat
+///
+/// ### ❗ Important:
+/// Anchor will **only auto-close accounts marked with `#[account(..., close = ...)]`** that are Anchor-initialized PDAs.
+/// For token accounts like `vault`, always **use `close_account` from the Token Program manually**.
+
 
 #[derive(Accounts)]
 pub struct Purchase<'info>{
@@ -126,7 +164,7 @@ impl <'info> Purchase<'info> {
 
         let cpi_ctx= CpiContext::new(cpi_program, cpi_accounts);
 
-        transfer(cpi_ctx, amount);
+        transfer(cpi_ctx, amount)?;
         Ok(())
     }
 

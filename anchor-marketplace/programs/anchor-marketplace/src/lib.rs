@@ -23,4 +23,13 @@ pub mod anchor_marketplace {
         ctx.accounts.list(price, &ctx.bumps)
         
     }
+
+    pub fn delist(ctx: Context<Delist>,) -> Result<()>{
+        ctx.accounts.delist()
+        
+    }
+
+    pub fn purchase_nft(ctx: Context<Purchase>)->Result<()> {
+        ctx.accounts.purchase_nft()
+    }
 }
