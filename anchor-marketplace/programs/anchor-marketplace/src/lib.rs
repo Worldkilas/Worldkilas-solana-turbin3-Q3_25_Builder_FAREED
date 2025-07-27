@@ -15,7 +15,5 @@ declare_id!("HGYmo6dFcDhvzyaGHwLYUkSWqZZp8BoEHDuJnMobMWkP");
 pub mod anchor_marketplace {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        initialize::handler(ctx)
-    }
+    
 }
