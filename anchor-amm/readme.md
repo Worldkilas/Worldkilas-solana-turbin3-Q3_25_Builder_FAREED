@@ -5,6 +5,7 @@ This repository contains a Solana program built with **Anchor** for an Automated
 ## Overview
 
 The **Anchor AMM** is designed to support:
+
 - **Initialization** of liquidity pools with configurable fees and token pairs.
 - **Depositing** liquidity to a pool in exchange for LP (liquidity provider) tokens.
 - **Swapping** tokens (X to Y or Y to X) with a constant product formula and fee application.
@@ -14,11 +15,13 @@ The **Anchor AMM** is designed to support:
 The program uses the **SPL Token Program** for token operations and implements a constant product curve (`constant_product_curve::ConstantProduct`) for pricing. Program Derived Addresses (PDAs) ensure secure ownership of pool vaults and LP mints.
 
 ## Program ID
+
 The program ID is: `6HPwmQCHtUC5kgwo4KvMRAWisuZJi9XZwEJCn7q3vkte`
 
 ## Prerequisites
 
 To build, deploy, or interact with this program, you need:
+
 - **Rust**: Install via `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`.
 - **Solana CLI**: Install with `sh -c "$(curl -sSfL https://release.solana.com/v1.18.17/install)"`.
 - **Anchor**: Install using `cargo install --git https://github.com/coral-xyz/anchor anchor-cli --locked`.
@@ -29,27 +32,33 @@ To build, deploy, or interact with this program, you need:
 ## Installation
 
 1. **Clone the Repository**:
+
    ```bash
    git clone <repository-url>
    cd anchor-amm
    ```
 
 2. **Install Dependencies**:
+
    ```bash
    yarn install
    ```
+
    Or, if using npm:
+
    ```bash
    npm install
    ```
 
 3. **Build the Program**:
+
    ```bash
    anchor build
    ```
 
 4. **Deploy to Devnet**:
    Configure Solana CLI for devnet:
+
    ```bash
    solana config set --url devnet
    anchor deploy
@@ -60,71 +69,9 @@ To build, deploy, or interact with this program, you need:
    anchor test
    ```
 
-## Architecture
-
-The following diagram illustrates the architecture of the AMM program, showing the accounts, instructions, and interactions with external programs like the SPL Token Program. It uses Mermaid syntax for rendering in compatible Markdown viewers (e.g., GitHub).
-
-```mermaid
-graph TD
-    A[User Wallet] -->|initialize| B[Config PDA<br>seed: [b'config', seed.to_le_bytes()]]
-    A -->|deposit| C[Pool Token X Vault<br>ATA: token_x_mint, authority=config]
-    A -->|deposit| D[Pool Token Y Vault<br>ATA: token_y_mint, authority=config]
-    A -->|swap| C
-    A -->|swap| D
-    A -->|withdraw| E[LP Token Mint PDA<br>seed: [b'lp', config.key()]]
-    B -->|owns| C
-    B -->|owns| D
-    B -->|mint authority| E
-    C -->|token transfer| F[SPL Token Program]
-    D -->|token transfer| F
-    E -->|mint/burn| F
-    F -->|associated token| G[Associated Token Program]
-    B -->|config data| H[Constant Product Curve]
-    A -->|deposit: mint LP tokens| E
-    A -->|withdraw: burn LP tokens| E
-    subgraph Instructions
-        I1[initialize]
-        I2[deposit]
-        I3[swap]
-        I4[withdraw]
-    end
-    I1 -->|creates| B
-    I1 -->|creates| C
-    I1 -->|creates| D
-    I1 -->|creates| E
-    I2 -->|uses| B
-    I2 -->|transfers to| C
-    I2 -->|transfers to| D
-    I2 -->|mints| E
-    I3 -->|uses| B
-    I3 -->|transfers to/from| C
-    I3 -->|transfers to/from| D
-    I4 -->|uses| B
-    I4 -->|transfers from| C
-    I4 -->|transfers from| D
-    I4 -->|burns| E
-```
-
-### Diagram Explanation
-- **User Wallet**: Interacts with the program via instructions (`initialize`, `deposit`, `swap`, `withdraw`).
-- **Config PDA**: Stores pool metadata (seed, fee, token mints, bumps) and acts as the authority for vaults and LP mint.
-- **Pool Token X/Y Vaults**: Associated token accounts (ATAs) holding liquidity for token X and Y, owned by the `Config` PDA.
-- **LP Token Mint PDA**: Mint for LP tokens, controlled by the `Config` PDA, used to track liquidity shares.
-- **SPL Token Program**: Handles token transfers, minting, and burning.
-- **Associated Token Program**: Creates ATAs for users and the pool.
-- **Constant Product Curve**: Computes swap, deposit, and withdrawal amounts based on the `x * y = k` formula.
-- **Instructions**: Each instruction interacts with specific accounts to perform its function, as shown by the arrows.
-
-## Program Structure
-
-The program is organized into the following modules:
-- **constants**: Defines constants used throughout the program.
-- **error**: Custom error types (`AmmError`) for handling various failure cases.
-- **helpers**: Utility functions or macros (e.g., `require_non_zero!`, `require_not_locked!`).
-- **instructions**: Core logic for `initialize`, `deposit`, `swap`, and `withdraw`.
-- **state**: Data structures, including the `Config` account for pool metadata.
 
 ### Data Structures
+
 - **Config**: Stores pool metadata:
   - `seed`: Unique seed for PDA derivation.
   - `authority`: Optional admin override for pool control.
@@ -136,7 +83,9 @@ The program is organized into the following modules:
 ### Instructions
 
 #### 1. Initialize
+
 Creates a new liquidity pool with a token pair, fee structure, and LP token mint.
+
 - **Accounts**:
   - `admin`: Signer who pays for account creation.
   - `token_x_mint` and `token_y_mint`: Mints for the token pair (e.g., USDC/SOL).
@@ -153,7 +102,9 @@ Creates a new liquidity pool with a token pair, fee structure, and LP token mint
   - Sets up token vaults for `token_x` and `token_y`.
 
 #### 2. Deposit
+
 Allows users to add liquidity to the pool in exchange for LP tokens.
+
 - **Accounts**:
   - `depositor`: Signer providing liquidity.
   - `token_x_mint` and `token_y_mint`: Token pair mints.
@@ -174,7 +125,9 @@ Allows users to add liquidity to the pool in exchange for LP tokens.
   - Mints LP tokens to `depositor_lp_token_account`.
 
 #### 3. Swap
+
 Facilitates token swaps (X to Y or Y to X) with a constant product curve and fees.
+
 - **Accounts**:
   - `token_pair_swapper`: Signer performing the swap.
   - `token_x_mint` and `token_y_mint`: Token pair mints.
@@ -194,7 +147,9 @@ Facilitates token swaps (X to Y or Y to X) with a constant product curve and fee
   - Transfers output tokens from the other vault to the swapper.
 
 #### 4. Withdraw
+
 Allows liquidity providers to burn LP tokens and reclaim tokens from the pool.
+
 - **Accounts**:
   - `withdrawer`: Signer withdrawing liquidity.
   - `token_x_mint` and `token_y_mint`: Token pair mints.
@@ -215,14 +170,17 @@ Allows liquidity providers to burn LP tokens and reclaim tokens from the pool.
   - Burns the specified LP tokens.
 
 ## Error Handling
+
 The `AmmError` enum defines custom errors, including:
+
 - `DefaultError`, `OfferExpired`, `PoolLocked`, `SlippageExceeded`, `Overflow`, `Underflow`.
 - `InvalidToken`, `LiquidityLessThanMinimum`, `NoLiquidityInPool`, `BumpError`, `CurveError`.
 - `InvalidFee`, `InvalidAuthority`, `NoAuthoritySet`, `InvalidAmount`, `InvalidPrecision`.
 - `InsufficientBalance`, `ZeroBalance`.
-Errors from the constant product curve are mapped to `AmmError` for consistent handling.
+  Errors from the constant product curve are mapped to `AmmError` for consistent handling.
 
 ## Security Considerations
+
 - **PDA Security**: Uses seeds (`config`: `[b"config", seed.to_le_bytes()]`, `lp_token_mint`: `[b"lp", config.key()]`) and bumps to ensure unique, secure PDAs.
 - **Pool Locking**: The `locked` flag prevents operations when the pool is locked, controlled by the `authority`.
 - **Slippage Protection**: `max_x`, `max_y` (deposit) and `min_x`, `min_y` (withdraw), `min_amount_out` (swap) prevent unfavorable trades.
@@ -231,7 +189,9 @@ Errors from the constant product curve are mapped to `AmmError` for consistent h
 - **Constant Product Curve**: Ensures fair pricing and prevents pool depletion through mathematical constraints.
 
 ## Testing
+
 To test the program:
+
 1. Start a local Solana validator:
    ```bash
    solana-test-validator
@@ -240,7 +200,8 @@ To test the program:
    ```bash
    anchor test
    ```
-The test suite should cover:
+   The test suite should cover:
+
 - Pool initialization with valid/invalid parameters.
 - Depositing liquidity (initial and subsequent deposits).
 - Swapping tokens in both directions (X-to-Y, Y-to-X).
@@ -248,6 +209,7 @@ The test suite should cover:
 - Error cases (e.g., locked pool, insufficient balance, slippage exceeded).
 
 ## Usage Example
+
 1. **Initialize a Pool**:
    Call `initialize` with a unique `seed`, fee (e.g., 30 = 0.3%), and optional `authority`. This sets up the `config`, `lp_token_mint`, and vaults.
 2. **Deposit Liquidity**:
@@ -258,6 +220,7 @@ The test suite should cover:
    Use `withdraw` to burn LP tokens (`lp_amount_to_be_burned`) and reclaim tokens, specifying `min_x` and `min_y` for slippage protection.
 
 ## Explanation of Key Components
+
 - **Constant Product Curve**: The `constant_product_curve::ConstantProduct` library enforces the `x * y = k` formula for pricing, ensuring pool balance. It handles calculations for swaps, deposits, and withdrawals, applying fees and checking slippage.
 - **PDA Management**: The `config` and `lp_token_mint` PDAs ensure secure ownership and control. The `config` PDA owns vaults and the LP mint, while bumps prevent seed collisions.
 - **Token Transfers**: Use `transfer_checked` for secure SPL token transfers, respecting token decimals and authority checks.
@@ -266,7 +229,9 @@ The test suite should cover:
 - **Macros**: `require_non_zero!` and `require_not_locked!` simplify validation checks across instructions.
 
 ## Contributing
+
 Contributions are welcome! Please:
+
 1. Fork the repository.
 2. Create a feature branch (`git checkout -b feature/your-feature`).
 3. Commit changes (`git commit -m "Add your feature"`).
@@ -274,4 +239,5 @@ Contributions are welcome! Please:
 5. Open a pull request.
 
 ## License
+
 This project is licensed under the MIT License. See the `LICENSE` file for details.
