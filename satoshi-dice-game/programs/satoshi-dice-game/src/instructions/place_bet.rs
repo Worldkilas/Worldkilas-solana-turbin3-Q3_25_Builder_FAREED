@@ -5,12 +5,18 @@ use anchor_lang::{
 
 use crate::state::Bet;
 
+
+/// Context for the `place_bet` instruction
+/// This sets up and initializes the Bet account and transfers funds into the vault
+
 #[derive(Accounts)]
 #[instruction(seed: u64)]
 pub struct PlaceBet<'info> {
     #[account(mut)]
     pub player: Signer<'info>,
 
+     /// The house account (authority). This is unchecked because it's only used as a seed for PDAs.
+    /// No direct read/write happens, and it is verified indirectly via `vault` PDA and signature checks elsewhere.
     /// CHECK: This is safe
     pub house: UncheckedAccount<'info>,
 
@@ -34,6 +40,8 @@ pub struct PlaceBet<'info> {
 }
 
 impl<'info> PlaceBet<'info> {
+    /// Initializes the Bet account with provided details
+    /// Stores the player's pubkey, bet amount, current slot, chosen roll, and bump
     pub fn create_bet(
         &mut self,
         amount: u64,

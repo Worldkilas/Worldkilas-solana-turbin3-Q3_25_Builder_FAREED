@@ -29,7 +29,7 @@ pub mod satoshi_dice_game {
         ctx.accounts.refund_bet(&ctx.bumps)
     }
 
-    pub fn resolve_bet(ctx: Context<ResolveBet>, sig: [u8;64]) -> Result<()> {
+    pub fn resolve_bet(ctx: Context<ResolveBet>, sig: [u8; 64]) -> Result<()> {
         ctx.accounts.verify_ed25519_signature(&sig)?;
         ctx.accounts.resolve_bet(&sig, &ctx.bumps)
     }
