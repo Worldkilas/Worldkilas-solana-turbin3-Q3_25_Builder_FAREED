@@ -1,12 +1,12 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import { SatoshiDiceGame } from "../target/types/satoshi_dice_game";
+import { AnchorMagicblockCounter } from "../target/types/anchor_magicblock_counter";
 
-describe("satoshi-dice-game", () => {
+describe("anchor-magicblock-counter", () => {
   // Configure the client to use the local cluster.
   anchor.setProvider(anchor.AnchorProvider.env());
 
-  const program = anchor.workspace.satoshiDiceGame as Program<SatoshiDiceGame>;
+  const program = anchor.workspace.anchorMagicblockCounter as Program<AnchorMagicblockCounter>;
 
   it("Is initialized!", async () => {
     // Add your test here.
@@ -14,5 +14,3 @@ describe("satoshi-dice-game", () => {
     console.log("Your transaction signature", tx);
   });
 });
-
-
