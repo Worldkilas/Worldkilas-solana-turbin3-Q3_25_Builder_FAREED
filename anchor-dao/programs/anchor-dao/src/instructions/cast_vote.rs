@@ -4,8 +4,15 @@ use anchor_spl::token::{Token, TokenAccount};
 use crate::{Dao, Proposal, Vote};
 
 
+/// Casts a vote on a proposal within a DAO using quadratic voting.
+/// 
+/// Quadratic voting means that the influence of a vote is the square root of the number of tokens held by the voter.
+/// This allows token holders with fewer tokens to still have meaningful input while limiting the domination of large holders.
+
 #[derive(Accounts)]
 pub struct CastVote<'info> {
+      /// The voter casting the vote.
+    /// Must sign the transaction and pay for the `vote_account` rent.
     #[account(mut)]
     pub voter: Signer<'info>,
 
@@ -50,6 +57,13 @@ pub struct CastVote<'info> {
 
 
 impl <'info> CastVote<'info> {
+    /// Casts the vote using quadratic voting.
+    ///
+    /// - `vote_type`: A `u8` indicating the type of vote (e.g., 0 = no, 1 = yes).
+    /// - `bumps`: The bump seeds for the involved PDAs (only `vote_account` is used here).
+    ///
+    /// Calculates the square root of the token amount in the voter’s account to determine voting credits.
+    /// This is a simplified approach to implement quadratic voti
     pub fn cast_vote(&mut self, vote_type:u8, bumps: &CastVoteBumps)->Result<()> {
         let voting_credits=(self.voter_token_account.amount as f64).sqrt() as u64;
 

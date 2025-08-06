@@ -2,6 +2,15 @@ use anchor_lang::prelude::*;
 
 use crate::{Dao, Proposal};
 
+/// Accounts context for initializing a new proposal under a DAO.
+///
+/// This instruction allows a DAO authority to create a new proposal, incrementing
+/// the DAO's internal `proposal_count` to ensure unique PDAs for each proposal.
+///
+/// ### PDA Derivation:
+/// - DAO:     `[b"dao", dao_authority_pubkey, dao_name_bytes]`
+/// - Proposal: `[b"proposal", dao_account_pda_pubkey, proposal_count_bytes]`
+
 #[derive(Accounts)]
 pub struct InitializeProposal<'info> {
     #[account(mut)]
@@ -31,12 +40,15 @@ pub struct InitializeProposal<'info> {
 }
 
 impl<'info> InitializeProposal<'info> {
+    /// Initializes a new proposal for the DAO.
+    ///
+    /// Increments the DAO's `proposal_count`, then creates a new `Proposal` account.
     pub fn init_proposal(
         &mut self,
         metadata: String,
         bumps: &InitializeProposalBumps,
     ) -> Result<()> {
-        self.dao_account_pda.proposal_count+=1;
+        self.dao_account_pda.proposal_count += 1;
         self.proposal_account.set_inner(Proposal {
             metadata,
             authority: self.dao_authority.key(),
