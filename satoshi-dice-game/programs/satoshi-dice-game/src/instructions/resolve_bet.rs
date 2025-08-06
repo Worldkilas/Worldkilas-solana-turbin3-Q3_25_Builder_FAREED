@@ -17,7 +17,7 @@ pub struct ResolveBet<'info> {
     /// The house authority who signs the Ed25519 message.
     #[account(mut)]
     pub house: Signer<'info>,
-    ///CHECK: THis is safe
+    ///CHECK: we are only receiving lamports + verified through bet.has_one
     pub player: UncheckedAccount<'info>,
 
     #[account(
