@@ -1,0 +1,10 @@
+[package]
+name = "sbt-test"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+mpl-core = "0.10.1"
+solana-client = "2.3.7"
+solana-sdk = "2.3.1"
+tokio = "1.47.1"
