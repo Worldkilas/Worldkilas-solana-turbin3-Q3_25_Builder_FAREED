@@ -16,10 +16,14 @@ pub enum MarketplaceError {
     InvalidPrice,
     #[msg("Already finalized")]
     AlreadyFinalized,
+    #[msg("Unit ordered exceeds allowed units per supporter or is zero")]
+    InvalidUnitsOrdered,
     #[msg("Too early to finalize")]
     TooEarlyToFinalize,
     #[msg("Campaign not successful")]
     CampaignNotSuccessful,
+    #[msg("Cannot refund from an already successful campaign")]
+    CampaignSuccessful,
     #[msg("Unauthorized")]
     Unauthorized,
     #[msg("Underflow")]
@@ -30,4 +34,8 @@ pub enum MarketplaceError {
     AlreadyRefunded,
     #[msg("Already minted")]
     AlreadyMinted,
+    #[msg("InvalidFeePoints")]
+    InvalidFeePoints,
+    #[msg("Collection already full")]
+    CollectionFull,
 }

@@ -31,18 +31,32 @@ pub struct InitializeMarketplace<'info> {
     )]
     pub treasury: SystemAccount<'info>,
 
+    pub token_mint: InterfaceAccount<'info, Mint>,
+
+    #[account(
+        init,
+        payer= authority,
+        associated_token::mint=token_mint,
+        associated_token::authority=treasury
+    )]
+    pub treasury_token_account: InterfaceAccount<'info, TokenAccount>,
+
+    pub token_program: Interface<'info, TokenInterface>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
 }
 
 impl<'info> InitializeMarketplace<'info> {
     pub fn init_marketplace(
         &mut self,
-        fee_bps: u16,
+        commit_fees_bps: u16,
+        withdraw_fees_bps: u16,
         bumps: &InitializeMarketplaceBumps,
     ) -> Result<()> {
         self.marketplace_config.set_inner(MarketplaceConfig {
             authority: self.authority.key(),
-            fee_bps,
+            commit_fees_bps,
+            withdraw_fees_bps,
             treasury_bump: bumps.treasury,
             bump: bumps.marketplace_config,
         });
