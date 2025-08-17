@@ -1,4 +1,4 @@
-use anchor_lang::{prelude::*, solana_program::example_mocks::solana_sdk::sysvar::fees};
+use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
     token::{close_account, transfer_checked, CloseAccount, TransferChecked},
@@ -7,7 +7,9 @@ use anchor_spl::{
 
 use crate::{
     require_campaign_finalized_and_successful, DropCampaign, MarketplaceConfig, BASIS_FEE_POINTS,
+    CONFIG_BINARY_STRING, DROP_CAMPAIGN_BINARY_STRING, TREASURY_BINARY_STRING,
 };
+
 
 #[derive(Accounts)]
 pub struct Withdraw<'info> {
@@ -15,7 +17,7 @@ pub struct Withdraw<'info> {
     pub creator: Signer<'info>,
 
     #[account(
-        seeds=[b"config", marketplace_config.authority.key().as_ref()],
+        seeds=[CONFIG_BINARY_STRING, marketplace_config.authority.key().as_ref()],
         bump= marketplace_config.bump
     )]
     pub marketplace_config: Account<'info, MarketplaceConfig>,
@@ -24,7 +26,7 @@ pub struct Withdraw<'info> {
         mut,
         has_one= creator,
         seeds=[
-            b"drop_campaign",
+            DROP_CAMPAIGN_BINARY_STRING,
             marketplace_config.key().as_ref(),
             drop_campaign.creator.key().as_ref(), 
             drop_campaign.name.as_bytes().as_ref()
@@ -45,7 +47,7 @@ pub struct Withdraw<'info> {
 
     #[account(
         mut,
-        seeds=[b"treasury", marketplace_config.key().as_ref()],
+        seeds=[TREASURY_BINARY_STRING, marketplace_config.key().as_ref()],
         bump=marketplace_config.treasury_bump,
     )]
     pub treasury: SystemAccount<'info>,

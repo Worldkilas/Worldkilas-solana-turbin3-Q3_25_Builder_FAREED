@@ -10,6 +10,7 @@ use crate::{
     MarketplaceConfig, SupporterAccount, BASIS_FEE_POINTS,
 };
 
+
 #[derive(Accounts)]
 pub struct Preorder<'info> {
     #[account(mut)]
@@ -34,7 +35,7 @@ pub struct Preorder<'info> {
     pub drop_campaign: Account<'info, DropCampaign>,
 
     #[account(
-        init,
+        init_if_needed,
         payer= supporter,
         space= 8+ SupporterAccount::INIT_SPACE,
         seeds=[b"supporter",drop_campaign.key().as_ref(),supporter.key().as_ref()],
@@ -117,6 +118,7 @@ impl<'info> Preorder<'info> {
                     <= self.drop_campaign.allowed_units_per_supporter,
                 MarketplaceError::InvalidUnitsOrdered
             );
+            require!(units_ordered>0, MarketplaceError::InvalidUnitsOrdered);
             self.supporter_account.amount_paid_to_campaign_vault += amount_to_commit;
             self.supporter_account.units_ordered += units_ordered;
         }
@@ -126,7 +128,7 @@ impl<'info> Preorder<'info> {
 
         self.commit_funds_to_campaign(amount_to_commit)?;
 
-        if self.drop_campaign.pledged_orders==self.drop_campaign.goal_orders {
+        if self.drop_campaign.pledged_orders == self.drop_campaign.goal_orders {
             self.finalize_campaign()?;
         }
 
@@ -138,7 +140,7 @@ impl<'info> Preorder<'info> {
             authority: self.supporter.key(),
             drop_campaign: self.drop_campaign.key(),
             amount_paid_to_campaign_vault: amount,
-            refunded: false,
+            is_refunded: false,
             has_minted_sbt: false,
             units_ordered,
             bump,
@@ -176,15 +178,22 @@ impl<'info> Preorder<'info> {
         Ok(())
     }
 
-    fn finalize_campaign(&mut self)->Result<()> {
-        require!(!self.drop_campaign.is_finalized, MarketplaceError::AlreadyFinalized);
+    fn finalize_campaign(&mut self) -> Result<()> {
+        require!(
+            !self.drop_campaign.is_finalized,
+            MarketplaceError::AlreadyFinalized
+        );
 
-        let now= Clock::get()?.unix_timestamp;
-        require!(now>=self.drop_campaign.end_timestamp, MarketplaceError::TooEarlyToFinalize);
+        // let now = Clock::get()?.unix_timestamp;
+        // require!(
+        //     now >= self.drop_campaign.end_timestamp,
+        //     MarketplaceError::TooEarlyToFinalize
+        // );
 
-        self.drop_campaign.is_finalized=true;
+        self.drop_campaign.is_finalized = true;
 
-        self.drop_campaign.is_successful=self.drop_campaign.pledged_orders==self.drop_campaign.goal_orders;
+        self.drop_campaign.is_successful =
+            self.drop_campaign.pledged_orders == self.drop_campaign.goal_orders;
 
         Ok(())
     }

@@ -1,15 +1,18 @@
 use anchor_lang::prelude::*;
-use anchor_spl::{associated_token::AssociatedToken, token_interface::TokenInterface};
 use mpl_core::{
     accounts::BaseCollectionV1,
     instructions::CreateV2CpiBuilder,
     types::{Attribute, Attributes, Plugin, PluginAuthorityPair},
-    Collection,
+   
 };
 
-use crate::{error::MarketplaceError, DropCampaign, MarketplaceConfig, SupporterAccount};
+use crate::{
+    error::MarketplaceError, DropCampaign, MarketplaceConfig, SupporterAccount,
+    CONFIG_BINARY_STRING, DROP_CAMPAIGN_BINARY_STRING, SUPPORTER_BINARY_STRING,
+};
 
 use mpl_core::ID as MPL_CORE_ID;
+
 
 #[derive(Accounts)]
 pub struct MintSbt<'info> {
@@ -17,7 +20,7 @@ pub struct MintSbt<'info> {
     pub supporter: Signer<'info>,
 
     #[account(
-        seeds=[b"config", marketplace_config.authority.key().as_ref()],
+        seeds=[CONFIG_BINARY_STRING, marketplace_config.authority.key().as_ref()],
         bump= marketplace_config.bump
     )]
     pub marketplace_config: Account<'info, MarketplaceConfig>,
@@ -25,7 +28,7 @@ pub struct MintSbt<'info> {
     #[account(
         mut,
         seeds=[
-            b"drop_campaign",
+            DROP_CAMPAIGN_BINARY_STRING,
             marketplace_config.key().as_ref(),
             drop_campaign.creator.key().as_ref(), 
             drop_campaign.name.as_bytes().as_ref()
@@ -34,6 +37,7 @@ pub struct MintSbt<'info> {
     )]
     pub drop_campaign: Account<'info, DropCampaign>,
 
+    /// CHECK; THE ADDRESS IS ALREADY CHECKED IN THE CONSTARINT AND MPL CORE
     #[account(
         mut,
         constraint= drop_campaign.collection_mint.key()==collection_mint.key() @MarketplaceError::Unauthorized
@@ -43,7 +47,7 @@ pub struct MintSbt<'info> {
     #[account(
         mut,
         close=supporter,
-        seeds=[b"supporter",drop_campaign.key().as_ref(),supporter.key().as_ref()],
+        seeds=[SUPPORTER_BINARY_STRING,drop_campaign.key().as_ref(),supporter.key().as_ref()],
         bump=supporter_account.bump
     )]
     pub supporter_account: Account<'info, SupporterAccount>,
@@ -84,9 +88,12 @@ impl<'info> MintSbt<'info> {
         let units_ordered = self.supporter_account.units_ordered;
         let total_spent_on_campaign = self.supporter_account.amount_paid_to_campaign_vault;
 
-        let mut drop_collection_data = &self.collection_mint.data.borrow()[..];
+        
 
-        let base_collection = BaseCollectionV1::deserialize(&mut drop_collection_data)?;
+        let base_collection = {
+            let mut drop_collection_data = &self.collection_mint.data.borrow()[..];
+            BaseCollectionV1::deserialize(&mut drop_collection_data)?
+        };
 
         require!(
             base_collection.num_minted as u64 <= self.drop_campaign.supporter_count,
@@ -129,6 +136,15 @@ impl<'info> MintSbt<'info> {
             plugin: Plugin::Attributes(Attributes { attribute_list }),
             authority: None,
         });
+
+    //    drop_collection_plugin.push(
+    //     PluginAuthorityPair {
+    //         plugin: Plugin::,
+    //         authority: Some(mpl_core::types::PluginAuthority::Address {
+    //             address: self.drop_campaign.key(),
+    //         }),
+    //     }
+    //    );
 
         let signers_seeds = &[
             b"drop_campaign",

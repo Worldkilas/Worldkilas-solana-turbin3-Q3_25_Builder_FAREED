@@ -11,7 +11,7 @@ pub use helper_macros::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("4V8C51KJ45atM2PBmYp91N2tQLHbzMThvMHvvzFKzAQT");
+declare_id!("CvnApgbZSUcqSThZjNAsGqWVqYK41C9sgiurC7XnQVuW");
 
 #[program]
 pub mod hue_marketplace_capstone {

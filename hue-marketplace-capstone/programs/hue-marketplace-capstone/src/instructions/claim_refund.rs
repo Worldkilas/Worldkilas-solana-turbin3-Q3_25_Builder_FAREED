@@ -1,4 +1,4 @@
-use anchor_lang::{accounts, prelude::*};
+use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
     token::{transfer_checked, TransferChecked},
@@ -8,6 +8,7 @@ use anchor_spl::{
 use crate::{error::MarketplaceError, DropCampaign, MarketplaceConfig, SupporterAccount};
 
 #[derive(Accounts)]
+
 pub struct ClaimRefund<'info> {
     #[account(mut)]
     pub supporter: Signer<'info>,
@@ -67,16 +68,9 @@ impl<'info> ClaimRefund<'info> {
             MarketplaceError::CampaignSuccessful
         );
         require!(
-            self.supporter_account.refunded,
+            self.supporter_account.is_refunded,
             MarketplaceError::AlreadyRefunded
         );
-
-        let accounts = TransferChecked {
-            from: self.campaign_vault.to_account_info(),
-            to: self.supporter_token_account.to_account_info(),
-            authority: self.drop_campaign.to_account_info(),
-            mint: self.token_mint.to_account_info(),
-        };
 
         let signer_seeds = &[
             b"drop_campaign",
@@ -107,7 +101,7 @@ impl<'info> ClaimRefund<'info> {
             self.token_mint.decimals,
         )?;
 
-        self.supporter_account.refunded = true;
+        self.supporter_account.is_refunded = true;
 
         Ok(())
     }

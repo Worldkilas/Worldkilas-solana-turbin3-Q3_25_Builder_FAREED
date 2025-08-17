@@ -8,7 +8,8 @@ use anchor_spl::{
     token_interface::{Mint, TokenAccount, TokenInterface},
 };
 
-use crate::MarketplaceConfig;
+use crate::{MarketplaceConfig, CONFIG_BINARY_STRING, TREASURY_BINARY_STRING};
+
 
 #[derive(Accounts)]
 pub struct InitializeMarketplace<'info> {
@@ -19,14 +20,14 @@ pub struct InitializeMarketplace<'info> {
         init,
         payer= authority,
         space= 8+ MarketplaceConfig::INIT_SPACE,
-        seeds=[b"config", authority.key().as_ref()],
+        seeds=[CONFIG_BINARY_STRING, authority.key().as_ref()],
         bump
     )]
     pub marketplace_config: Account<'info, MarketplaceConfig>,
 
     #[account(
         mut,
-        seeds=[b"treasury",marketplace_config.key().as_ref()],
+        seeds=[TREASURY_BINARY_STRING,marketplace_config.key().as_ref()],
         bump
     )]
     pub treasury: SystemAccount<'info>,

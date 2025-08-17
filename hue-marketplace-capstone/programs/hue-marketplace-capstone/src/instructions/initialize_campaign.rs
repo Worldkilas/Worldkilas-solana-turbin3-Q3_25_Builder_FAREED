@@ -5,23 +5,20 @@ use anchor_spl::{
     associated_token::AssociatedToken,
     token_interface::{Mint, TokenAccount, TokenInterface},
 };
+use mpl_core::types::{Attribute, Attributes, Plugin, PluginAuthorityPair};
 use mpl_core::{
-    accounts::BaseAssetV1,
-    types::{Attribute, Attributes, Plugin, PluginAuthorityPair, VerifiedCreators},
-    PermanentBurnDelegatePlugin,
-};
-use mpl_core::{
-    instructions::{
-        CreateCollectionV1CpiAccounts, CreateCollectionV2CpiAccounts, CreateCollectionV2CpiBuilder,
-    },
+    instructions::CreateCollectionV2CpiBuilder,
     types::{
-        ExternalCheckResult, ExternalPluginAdapter, ExternalPluginAdapterInitInfo,
-        HookableLifecycleEvent, OracleInitInfo,
+        ExternalCheckResult, ExternalPluginAdapterInitInfo, HookableLifecycleEvent, OracleInitInfo,
     },
     ID as MPL_CORE_ID,
 };
 
-use crate::{DropCampaign, MarketplaceConfig, ONCHAIN_METAPLEX_ORACLE_PLUGIN};
+use crate::{
+    DropCampaign, MarketplaceConfig, CONFIG_BINARY_STRING, DROP_CAMPAIGN_BINARY_STRING,
+    ONCHAIN_METAPLEX_ORACLE_PLUGIN,
+};
+
 
 #[derive(Accounts)]
 #[instruction(name: String)]
@@ -33,7 +30,7 @@ pub struct InitializeCampaign<'info> {
     pub collection_mint: Signer<'info>,
 
     #[account(
-        seeds=[b"config", marketplace_config.authority.key().as_ref()],
+        seeds=[CONFIG_BINARY_STRING, marketplace_config.authority.key().as_ref()],
         bump= marketplace_config.bump
     )]
     pub marketplace_config: Account<'info, MarketplaceConfig>,
@@ -43,7 +40,7 @@ pub struct InitializeCampaign<'info> {
         payer=creator,
         space=8+DropCampaign::INIT_SPACE,
         seeds=[
-            b"drop_campaign",
+            DROP_CAMPAIGN_BINARY_STRING,
             marketplace_config.key().as_ref(),
             creator.key().as_ref(), 
             name.as_bytes().as_ref()
@@ -129,10 +126,10 @@ impl<'info> InitializeCampaign<'info> {
             .payer(self.creator.as_ref())
             .name(drop_name)
             .uri(args.uri)
-            .plugins(vec![PluginAuthorityPair {
-                plugin: Plugin::Attributes(Attributes { attribute_list }),
-                authority: None,
-            }])
+            // .plugins(vec![PluginAuthorityPair {
+            //     plugin: Plugin::Attributes(Attributes { attribute_list }),
+            //     authority: None,
+            // }])
             .system_program(self.system_program.to_account_info().as_ref())
             .external_plugin_adapters(vec![ExternalPluginAdapterInitInfo::Oracle(
                 OracleInitInfo {
@@ -147,6 +144,10 @@ impl<'info> InitializeCampaign<'info> {
                 },
             )])
             .invoke()?;
+
+        msg!("✅ Builder constructed, invoking CPI...");
+
+        msg!("🎉 Collection successfully created");
 
         Ok(())
     }
