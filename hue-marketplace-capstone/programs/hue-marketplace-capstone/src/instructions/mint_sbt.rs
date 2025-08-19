@@ -13,6 +13,12 @@ use crate::{
 
 use mpl_core::ID as MPL_CORE_ID;
 
+/// Accounts required for minting an SBT (Soulbound Token) to a supporter.
+/// 
+/// Flow:
+/// - Checks campaign is finalized and successful
+/// - Validates supporter eligibility
+/// - Uses `CreateV2CpiBuilder` to mint an NFT (non-transferable) with metadata
 
 #[derive(Accounts)]
 pub struct MintSbt<'info> {
@@ -37,6 +43,7 @@ pub struct MintSbt<'info> {
     )]
     pub drop_campaign: Account<'info, DropCampaign>,
 
+     /// Mint account for the drop collection.
     /// CHECK; THE ADDRESS IS ALREADY CHECKED IN THE CONSTARINT AND MPL CORE
     #[account(
         mut,
@@ -44,6 +51,8 @@ pub struct MintSbt<'info> {
     )]
     pub collection_mint: AccountInfo<'info>,
 
+    /// Supporter-specific state account.
+    /// Closed after minting to reclaim ren
     #[account(
         mut,
         close=supporter,
@@ -52,6 +61,7 @@ pub struct MintSbt<'info> {
     )]
     pub supporter_account: Account<'info, SupporterAccount>,
 
+      /// New NFT account representing the supporter’s soulbound token
     #[account(mut)]
     pub supporter_asset_nft: Signer<'info>,
 
@@ -61,6 +71,8 @@ pub struct MintSbt<'info> {
     pub system_program: Program<'info, System>,
 }
 
+
+/// Arguments required to mint the supporter’s SBT.
 #[derive(AnchorDeserialize, AnchorSerialize)]
 pub struct CreateAssetArgs {
     pub name: String,
@@ -68,6 +80,11 @@ pub struct CreateAssetArgs {
 }
 
 impl<'info> MintSbt<'info> {
+    /// Mint an SBT (soulbound NFT) for the supporter.
+    ///
+    /// - Verifies supporter eligibility.
+    /// - Ensures campaign was successful.
+    /// - Mints a unique NFT with attributes (drop, creator, contribution, etc).
     pub fn mint_sbt_for_suporter(&mut self, args: CreateAssetArgs) -> Result<()> {
         require_keys_eq!(
             self.supporter_account.authority.key(),

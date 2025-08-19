@@ -20,6 +20,17 @@ use crate::{
 };
 
 
+/// Instruction: InitializeCampaign
+///
+/// Creates and initializes a new drop campaign:
+/// - Sets campaign metadata (goal, price, duration, etc.)
+/// - Creates the campaign vault (ATA owned by the campaign PDA)
+/// - Registers the campaign with Metaplex Core via CPI
+/// - Attaches oracle plugin for lifecycle validation
+///
+/// Once executed, supporters can begin committing funds to this campaign.
+
+
 #[derive(Accounts)]
 #[instruction(name: String)]
 pub struct InitializeCampaign<'info> {
@@ -51,6 +62,8 @@ pub struct InitializeCampaign<'info> {
 
     pub token_mint: InterfaceAccount<'info, Mint>,
 
+    /// Campaign vault (ATA owned by the campaign PDA)
+    /// Stores funds contributed by supporters until campaign finalization
     #[account(
         init,
         payer= creator,
@@ -72,6 +85,7 @@ pub struct InitializeCampaign<'info> {
     pub system_program: Program<'info, System>,
 }
 
+/// Arguments provided by the creator when initializing a drop campaign
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct InitDropCampaignArgs {
     pub name: String,
@@ -85,6 +99,11 @@ pub struct InitDropCampaignArgs {
 }
 
 impl<'info> InitializeCampaign<'info> {
+    /// Launches a new drop campaign.
+    /// 1. Calculates campaign timeline
+    /// 2. Initializes the DropCampaign PDA
+    /// 3. Calls Metaplex Core CPI to create a collection
+    /// 4. Attaches oracle plugin for transfer validation
     pub fn launch_drop(
         &mut self,
         args: InitDropCampaignArgs,

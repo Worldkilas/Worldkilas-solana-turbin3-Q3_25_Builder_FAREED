@@ -11,6 +11,13 @@ use crate::{
 };
 
 
+
+
+/// Preorder instruction context
+///
+/// Allows a supporter to preorder units in an active campaign,
+/// transferring funds to both the campaign vault and marketplace treasury.
+/// It also initializes a supporter account on first preorder.
 #[derive(Accounts)]
 pub struct Preorder<'info> {
     #[account(mut)]
@@ -79,6 +86,12 @@ pub struct Preorder<'info> {
 }
 
 impl<'info> Preorder<'info> {
+    /// Executes preorder flow:
+    /// 1. Validates campaign state.
+    /// 2. Calculates fee split (marketplace fees vs committed funds).
+    /// 3. Initializes supporter account if first time.
+    /// 4. Transfers funds (fees → treasury, commit → campaign vault).
+    /// 5. Finalizes campaign if goal is reached.
     pub fn preorder(&mut self, units_ordered: u32, bumps: &PreorderBumps) -> Result<()> {
         let now = Clock::get()?.unix_timestamp;
         require_campaign_active!(now, self.drop_campaign);

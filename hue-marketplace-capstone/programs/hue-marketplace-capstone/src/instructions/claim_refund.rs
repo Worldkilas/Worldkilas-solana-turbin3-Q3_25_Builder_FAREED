@@ -7,12 +7,24 @@ use anchor_spl::{
 
 use crate::{error::MarketplaceError, DropCampaign, MarketplaceConfig, SupporterAccount};
 
+
+/// Instruction: ClaimRefund
+/// 
+/// Allows a supporter to claim back their committed funds if:
+/// - The campaign has been finalized, **and**
+/// - The campaign was not successful (goal not reached).
+/// 
+/// Once executed:
+/// - Funds are transferred from the campaign vault back to the supporter's ATA.
+/// - The supporter account is closed and lamports returned.
+/// - The supporter is marked as refunded to prevent double refunds.
 #[derive(Accounts)]
 
 pub struct ClaimRefund<'info> {
     #[account(mut)]
     pub supporter: Signer<'info>,
 
+     /// Global marketplace config (authority + bump)
     #[account(
         seeds=[b"config", marketplace_config.authority.key().as_ref()],
         bump= marketplace_config.bump
@@ -31,8 +43,11 @@ pub struct ClaimRefund<'info> {
     )]
     pub drop_campaign: Account<'info, DropCampaign>,
 
+    /// Token mint used for contributions
     pub token_mint: InterfaceAccount<'info, Mint>,
 
+     /// Supporter account PDA tracking their contribution
+    /// - Closed after refund to reclaim rent
     #[account(
         mut,
         close=supporter,
@@ -62,6 +77,11 @@ pub struct ClaimRefund<'info> {
 }
 
 impl<'info> ClaimRefund<'info> {
+    /// Executes the refund flow:
+    /// 1. Ensures campaign was finalized but unsuccessful
+    /// 2. Ensures supporter hasn’t already been refunded
+    /// 3. Transfers funds from campaign vault → supporter ATA
+    /// 4. Marks supporter as refunded
     pub fn claim_refund(&mut self) -> Result<()> {
         require!(
             self.drop_campaign.is_finalized && !self.drop_campaign.is_successful,

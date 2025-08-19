@@ -10,7 +10,12 @@ use anchor_spl::{
 
 use crate::{MarketplaceConfig, CONFIG_BINARY_STRING, TREASURY_BINARY_STRING};
 
-
+/// Accounts required for initializing the marketplace.
+/// 
+/// This sets up:
+/// - A `MarketplaceConfig` PDA holding marketplace parameters
+/// - A treasury `SystemAccount` to collect fees
+/// - An associated token account for the treasury
 #[derive(Accounts)]
 pub struct InitializeMarketplace<'info> {
     #[account(mut)]
@@ -34,6 +39,8 @@ pub struct InitializeMarketplace<'info> {
 
     pub token_mint: InterfaceAccount<'info, Mint>,
 
+    /// Associated token account for the treasury PDA.
+    /// This will hold SPL tokens corresponding to the above `token_mint`.
     #[account(
         init,
         payer= authority,
@@ -48,6 +55,11 @@ pub struct InitializeMarketplace<'info> {
 }
 
 impl<'info> InitializeMarketplace<'info> {
+     /// Initializes the marketplace configuration.
+    ///
+    /// - Sets the commit & withdraw fees in basis points (bps).
+    /// - Stores treasury bump & config bump.
+    /// - Funds the treasury account with minimum rent-exemption lamports.
     pub fn init_marketplace(
         &mut self,
         commit_fees_bps: u16,
