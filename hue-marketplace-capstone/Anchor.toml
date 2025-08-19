@@ -5,13 +5,13 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-hue_marketplace_capstone = "9Bq2bBd7ev7euWesoscTJ5Tug5pPrxKdB3h4UuWzUw5t"
+hue_marketplace_capstone = "CvnApgbZSUcqSThZjNAsGqWVqYK41C9sgiurC7XnQVuW"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/turbin3-wallet.json"
 
 [scripts]
